@@ -94,7 +94,7 @@ sudo make && make install
 ls /lib/security   # Check if pam_python.so is present
 ```
 
-### Project Installation
+### Pam Python Module
 To install the project, run the following command:
 ```bash
 git clone https://github.com/Pengrey/IAA.git
@@ -110,4 +110,16 @@ auth sufficient pam_python.so /path/to/Project_1/src/login.py
 Edit /etc/pam.d/common-session and add this line to the top of the file:
 ```bash
 session	sufficient pam_python.so /path/to/Project_1/src/login.py
+```
+
+### IdP Login
+To install the IdP Login command-line application, run the following command:
+```bash
+cd Project_1/src/idp_login
+go build -o idp_login main.go       // Build the application
+sudo groupadd idpadmins             // Create a group for IdP administrators
+sudo usermod -a -G idpadmins root   // Add root to the group
+sudo chown root idp_login           // Set the owner to root
+sudo chmod 4750 idp_login           // Set the setuid bit
+sudo mv idp_login /usr/bin          // Move the application to /usr/bin
 ```

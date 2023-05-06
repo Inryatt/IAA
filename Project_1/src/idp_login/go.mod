@@ -2,7 +2,10 @@ module idp_login
 
 go 1.20
 
-require github.com/urfave/cli/v2 v2.25.3
+require (
+	github.com/mattn/go-sqlite3 v1.14.16
+	github.com/urfave/cli/v2 v2.25.3
+)
 
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
