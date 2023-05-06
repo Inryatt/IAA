@@ -20,20 +20,20 @@ idp_login <action> [options]
 1. **Set, change, or delete IdPs and their operational parameters (for host administrators):**
 
 ```bash
-idp_login manage-idp <operation> [--idp IDP_NAME] [--params PARAMS]
+idp_login manage-idp [--operation set|change|delete] [--idp IDP_NAME] [--params PARAMS]
 ```
 
-- `<operation>`: The operation to perform, e.g. set, change, or delete.
+- `--operation`: The operation to perform, e.g. set, change, or delete.
 - `--idp IDP_NAME`: The name of the IdP to be managed (required for set and change operations).
 - `--params PARAMS`: The operational parameters for the IdP (required for set and change operations).
 
 2. **Set, change, or delete identity attributes for a given IdP for the current user:**
 
 ```bash
-idp_login manage-attributes <operation> [--idp IDP_NAME] [--attributes ATTRIBUTES]
+idp_login manage-attributes [--operation set|change|delete] [--idp IDP_NAME] [--attributes ATTRIBUTES]
 ```
 
-- `<operation>`: The operation to perform, e.g. set, change, or delete.
+- `--operation`: The operation to perform, e.g. set, change, or delete.
 - `--idp IDP_NAME`: The name of the IdP whose attributes need to be managed (required for set and change operations).
 - `--attributes ATTRIBUTES`: The identity attributes for the IdP (required for set and change operations).
 
@@ -46,29 +46,27 @@ idp_login list-users
 4. **List the IdPs registered for the current user and the identity parameters for each IdP:**
 
 ```bash
-idp_login list-idps [--user USER]
+idp_login list-idps
 ```
-
-- `--user USER`: Optional argument to specify the user whose IdPs and parameters should be listed. If not provided, it will default to the current user.
 
 ## Examples
 
 - To set an IdP with its operational parameters:
 
 ```bash
-sudo idp_login manage-idp set --idp IDP_NAME --params PARAMS
+sudo idp_login manage-idp --operation set --idp IDP_NAME --params PARAMS
 ```
 
 - To delete an IdP:
 
 ```bash
-sudo idp_login manage-idp delete --idp IDP_NAME
+sudo idp_login manage-idp --operation delete --idp IDP_NAME
 ```
 
 - To set identity attributes for a given IdP:
 
 ```bash
-idp_login manage-attributes set --idp IDP_NAME --attributes ATTRIBUTES
+idp_login manage-attributes --operation set --idp IDP_NAME --attributes ATTRIBUTES
 ```
 
 - To list all users with registered IdPs:

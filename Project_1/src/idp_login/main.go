@@ -4,9 +4,42 @@ import (
     "fmt"
     "log"
     "os"
+	"os/user"
 
     "github.com/urfave/cli/v2"
 )
+
+func isAdministrator() bool {
+	// Check if the current user is the IDP_ADMINS group
+	usr, err := user.Current()
+	if err != nil {
+		fmt.Println("[!] Error: could not get current user")
+		return false
+	}
+
+	// Get group information
+	group, err := user.LookupGroup("IDP_ADMINS")
+	if err != nil {
+		fmt.Println("[!] Error: could not get IDP_ADMINS group information")
+		return false
+	}
+
+	// Get the list of user groups
+	userGroups, err := usr.GroupIds()
+	if err != nil {
+		fmt.Println("[!] Error: could not get user groups")
+		return false
+	}
+
+	// Check if the user is in the IDP_ADMINS group
+	for _, userGroup := range userGroups {
+		if userGroup == group.Gid {
+			return true
+		}
+	}
+
+	return false
+}
 
 func main() {
     app := &cli.App{
@@ -15,10 +48,16 @@ func main() {
         
 		Commands: []*cli.Command{
 			{
-				Name:    "manage-idp",
-				Usage:       "Set, change or delete IdPs and their operational parameters",
-				Description: "For host administrators",
+				Name:    	 "manage-idp",
+				Usage:       "manage-idp [--operation set|change|delete] [--idp IDP_NAME] [--params PARAMS]",
+				Description: "Set, change or delete operational parameters for a given IdP, only users belonging to the IDP_ADMINS group can perform this operation",
 				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "operation",
+						Aliases: []string{"o"},
+						Usage:   "Operation to perform (set, change, delete)",
+						Required: true,
+					},
 					&cli.StringFlag{
 						Name:    "idp",
 						Aliases: []string{"i"},
@@ -32,14 +71,27 @@ func main() {
 					},
 				},
 				Action: func(c *cli.Context) error {
+					// Check if the current user is the IDP_ADMINS group
+					if !isAdministrator() {
+						fmt.Println("[!] Error: current user is not an administrator")
+						return nil
+					}
+
 					fmt.Println("manage-idp")
 					return nil
 				},
 			},
 			{
-				Name:    "manage-attributes",
-				Usage:   "Set, change or delete identity attributes for a given IdP for the current user",
+				Name:    	 "manage-attributes",
+				Usage:   	 "manage-attributes [--operation set|change|delete] [--idp IDP_NAME] [--attributes ATTRIBUTES]",
+				Description: "Set, change or delete identity attributes for a given IdP, the changes are applied only to the current user",
 				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "operation",
+						Aliases: []string{"o"},
+						Usage:   "Operation to perform (set, change, delete)",
+						Required: true,
+					},
 					&cli.StringFlag{
 						Name:    "idp",
 						Aliases: []string{"i"},
@@ -58,23 +110,24 @@ func main() {
 				},
 			},
 			{
-				Name:    "list-users",
-				Usage:   "List the users registered for the current IdP and the identity parameters registered for each user",
+				Name:    	 "list-users",
+				Usage:   	 "list-users",
+				Description: "List all users with registered IdPs, only users belonging to the IDP_ADMINS group can perform this operation",
 				Action: func(c *cli.Context) error {
+					// Check if the current user is the IDP_ADMINS group
+					if !isAdministrator() {
+						fmt.Println("[!] Error: current user is not an administrator")
+						return nil
+					}
+
 					fmt.Println("list-users")
 					return nil
 				},
 			},
 			{
-				Name:    "list-idps",
-				Usage:   "List the IdPs registered for the current user and the identity parameters registered for each IdP",
-				Flags: []cli.Flag{
-					&cli.StringFlag{
-						Name:    "user",
-						Aliases: []string{"u"},
-						Usage:   "User to list IdPs for (defaults to current user)",
-					},
-				},
+				Name:    	 "list-idps",
+				Usage:   	 "list-idps",
+				Description: "List all registered IdPs, only for the current user",
 				Action: func(c *cli.Context) error {
 					fmt.Println("list-idps")
 					return nil
