@@ -1,6 +1,7 @@
 # Test implementation of multiple device flow authentications
 import requests
 import time
+import qrcode
 
 # Parse API response
 def parse_response(response, dict):
@@ -32,6 +33,14 @@ def request_device(client_id, scope, url):
     else:
         return None
 
+# Generate QR code and print to console
+def generate_qr_code(url):
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(url)
+    qr.make(fit=True)
+    qr.print_ascii()
+
+
 # Poll for a user token
 def poll_for_token(url, arguments):
     interval = 5
@@ -62,9 +71,9 @@ def oauth2(idp, qr_code):
     # Print User information
     if qr_code:
         print('Please scan the following QR code with your mobile device:')
-        print('qr_code')
+        generate_qr_code(idp['user_url'])
     else:
-        print('Please visit the following URL in your browser:' + idp['request_url'])
+        print('Please visit the following URL in your browser:' + idp['user_url'])
     
     print('Enter the following code when prompted: ' + user_code)
 
@@ -86,6 +95,7 @@ def main():
             'client_id': 'a6b22dc869165e33cd5b',
             'scope': 'user:email'
         },
+        'user_url': 'https://github.com/login/device',
         'poll_url': 'https://github.com/login/oauth/access_token',
         'poll_arguments': {
             'client_id': 'a6b22dc869165e33cd5b',
@@ -101,6 +111,7 @@ def main():
             'client_id': '572020437555-gmf1c30oaqla0749f730udft703es94q.apps.googleusercontent.com',
             'scope': 'https://www.googleapis.com/auth/userinfo.email'
         },
+        'user_url': 'https://accounts.google.com/o/oauth2/device/usercode',
         'poll_url': 'https://accounts.google.com/o/oauth2/token',
         'poll_arguments': {
             'client_id': '572020437555-gmf1c30oaqla0749f730udft703es94q.apps.googleusercontent.com',
@@ -111,13 +122,13 @@ def main():
     }
 
     # Test Github
-    if oauth2(github, False):
+    if oauth2(github, True):
         print('Github authentication successful')
     else:
         print('Github authentication failed')
 
     # Test Google
-    if oauth2(google, False):
+    if oauth2(google, True):
         print('Google authentication successful')
     else:
         print('Google authentication failed')
