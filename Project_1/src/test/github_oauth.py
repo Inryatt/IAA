@@ -1,6 +1,5 @@
 # Test implementation of github device flow authentication
 import requests
-import json
 import time
 
 # Request a device code from github
@@ -13,7 +12,6 @@ def request_device_code(client_id, scope):
     response = requests.post('https://github.com/login/device/code', data=data)
 
     if response.status_code == 200:
-        print response.text
         return response.text
     else:
         return None
@@ -28,7 +26,6 @@ def parse_response(response, dict):
 
 # Poll github for a user token
 def poll_for_token(client_id, device_code, interval, timeout):
-    url = 'https://github.com/Pengrey/IAA'
     data = {
         'client_id': client_id,
         'device_code': device_code,

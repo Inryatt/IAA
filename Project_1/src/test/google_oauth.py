@@ -1,6 +1,5 @@
 # Test implementation of google device flow authentication
 import requests
-import json
 import time
 
 # Request a device code from google
