@@ -6,6 +6,8 @@ import (
     "os"
 	"os/user"
 	"database/sql"
+    "encoding/json"
+	"bytes"
 
     "github.com/urfave/cli/v2"
 	_ "github.com/mattn/go-sqlite3"
@@ -183,8 +185,7 @@ func manage_idp(operation string, idp string, params string) {
 		// Update the IdP in the sqlite database
 		_, err = db.Exec("UPDATE idps SET params = ? WHERE name = ?", params, idp)
 		if err != nil {
-			// print error
-			fmt.Println(err)
+			fmt.Println("[!] Error: could not update IdP in database")
 			return
 		}
 
@@ -216,6 +217,240 @@ func manage_idp(operation string, idp string, params string) {
 
 		// Print success message
 		fmt.Println("[+] IdP successfully deleted")
+	}
+}
+
+func getCurrentUser() string {
+	// Get the current user
+	user, err := user.Current()
+	if err != nil {
+		fmt.Println("[!] Error: could not get current user")
+		return ""
+	}
+
+	return user.Username
+}
+
+func list_available_idps() {
+	// Open database connection
+	db, err := sql.Open("sqlite3", DATABASE_PATH)
+	if err != nil {
+		fmt.Println("[!] Error: could not open database")
+		return
+	}
+
+	// Close database connection
+	defer db.Close()
+
+	// Query the database
+	rows, err := db.Query("SELECT name FROM idps")
+	if err != nil {
+		fmt.Println("[!] Error: could not query database")
+		return
+	}
+
+	// Close rows
+	defer rows.Close()
+
+	// Print IdPs
+	fmt.Println("[+] Available IdPs:")
+	for rows.Next() {
+		var name string
+		rows.Scan(&name)
+		fmt.Println("    - " + name)
+	}
+}
+
+func list_users() {
+	// Open database connection
+	db, err := sql.Open("sqlite3", DATABASE_PATH)
+	if err != nil {
+		fmt.Println("[!] Error: could not open database")
+		return
+	}
+
+	// Close database connection
+	defer db.Close()
+
+	// Query the database
+	rows, err := db.Query("SELECT username FROM attributes")
+	if err != nil {
+		fmt.Println("[!] Error: could not query database")
+		return
+	}
+
+	// Close rows
+	defer rows.Close()
+
+	// Print users
+	fmt.Println("[+] Users:")
+	for rows.Next() {
+		var username string
+		rows.Scan(&username)
+		fmt.Println("    - " + username)
+	}
+}
+
+func list_idps(username string) {
+	// Open database connection
+	db, err := sql.Open("sqlite3", DATABASE_PATH)
+	if err != nil {
+		fmt.Println("[!] Error: could not open database")
+		return
+	}
+
+	// Close database connection
+	defer db.Close()
+
+	// Query the database
+	rows, err := db.Query("SELECT idp FROM attributes WHERE username = ?", username)
+	if err != nil {
+		fmt.Println("[!] Error: could not query database")
+		return
+	}
+
+	// Close rows
+	defer rows.Close()
+
+	// Print IdPs
+	fmt.Println("[+] IdPs:")
+	for rows.Next() {
+		var idp string
+		rows.Scan(&idp)
+		fmt.Println("    - " + idp)
+	}
+}
+
+func print_attributes(idp string) {
+	// Check if the IdP exists
+	if !idp_exists(idp) {
+		fmt.Println("[!] Error: IdP does not exist")
+		return
+	}
+
+	// Open database connection
+	db, err := sql.Open("sqlite3", DATABASE_PATH)
+	if err != nil {
+		fmt.Println("[!] Error: could not open database")
+		return
+	}
+
+	// Close database connection
+	defer db.Close()
+
+	// Query the database abd query for the idp params
+	rows, err := db.Query("SELECT params FROM idps WHERE name = ?", idp)
+	if err != nil {
+		fmt.Println("[!] Error: could not query database")
+		return
+	}
+
+	// Close rows
+	defer rows.Close()
+
+	// Print JSON params
+	for rows.Next() {
+		var params string
+		rows.Scan(&params)
+		var out bytes.Buffer
+		err := json.Indent(&out, []byte(params), "", "\t")
+		if err != nil {
+			fmt.Println("[!] Error: could not indent JSON")
+			fmt.Println("[+] IdP params:")
+			fmt.Println(params)
+			return
+		}
+
+		fmt.Println("[+] IdP params:")
+		fmt.Println(out.String())
+	}
+}
+
+func manage_attributes(username string, operation string, idp string, attributes string) {
+	// Check if the IdP exists
+	if !idp_exists(idp) {
+		fmt.Println("[!] Error: IdP does not exist")
+		return
+	}
+
+	// Check if attributes is empty
+	if attributes == "" {
+		fmt.Println("[!] Error: attributes cannot be empty")
+		return
+	}
+
+	// Check if the operation is valid
+	if operation != "set" && operation != "change" && operation != "delete" {
+		fmt.Println("[!] Error: invalid operation")
+		return
+	}
+
+	if operation == "set" {
+		// Open database connection
+		db, err := sql.Open("sqlite3", DATABASE_PATH)
+		if err != nil {
+			fmt.Println("[!] Error: could not open database")
+			return
+		}
+
+		// Close database connection
+		defer db.Close()
+
+		// Insert the attributes into the database
+		_, err = db.Exec("INSERT INTO attributes (username, idp, attributes) VALUES (?, ?, ?)", username, idp, attributes)
+		if err != nil {
+			fmt.Println("[!] Error: could not insert attributes into database")
+			return
+		}
+
+		// Print success message
+		fmt.Println("[+] Attributes successfully added")
+	} else if operation == "change" {
+		// Check if attributes is empty
+		if attributes == "" {
+			fmt.Println("[!] Error: attributes cannot be empty for change operation")
+			return
+		}
+
+		// Open database connection
+		db, err := sql.Open("sqlite3", DATABASE_PATH)
+		if err != nil {
+			fmt.Println("[!] Error: could not open database")
+			return
+		}
+
+		// Close database connection
+		defer db.Close()
+
+		// Update the attributes in the sqlite database
+		_, err = db.Exec("UPDATE attributes SET attributes = ? WHERE username = ? AND idp = ?", attributes, username, idp)
+		if err != nil {
+			fmt.Println("[!] Error: could not update attributes in database")
+			return
+		}
+
+		// Print success message
+		fmt.Println("[+] Attributes successfully updated")
+	} else if operation == "delete" {
+		// Open database connection
+		db, err := sql.Open("sqlite3", DATABASE_PATH)
+		if err != nil {
+			fmt.Println("[!] Error: could not open database")
+			return
+		}
+
+		// Close database connection
+		defer db.Close()
+
+		// Delete the attributes from the sqlite database
+		_, err = db.Exec("DELETE FROM attributes WHERE username = ? AND idp = ?", username, idp)
+		if err != nil {
+			fmt.Println("[!] Error: could not delete attributes from database")
+			return
+		}
+
+		// Print success message
+		fmt.Println("[+] Attributes successfully deleted")
 	}
 }
 
@@ -293,7 +528,6 @@ func main() {
 						Name:    "idp",
 						Aliases: []string{"i"},
 						Usage:   "IdP name",
-						Required: true,
 					},
 					&cli.StringFlag{
 						Name:    "attributes",
@@ -302,7 +536,33 @@ func main() {
 					},
 				},
 				Action: func(c *cli.Context) error {
-					fmt.Println("manage-attributes")
+					// Get the operation to perform
+					operation := c.String("operation")
+					if operation != "set" && operation != "change" && operation != "delete" {
+						fmt.Println("[!] Error: invalid operation")
+					} else {
+						// Get username
+						username := getCurrentUser()
+
+						// Check if idp is set
+						idp := c.String("idp")
+						if idp == "" {
+							// List all IdPs available
+							list_available_idps()
+						} else {
+							// Get the attributes
+							attributes := c.String("attributes")
+
+							if attributes == "" {
+								// Print the attributes for the given IdP
+								print_attributes(idp)
+							} else {
+								// Manage the attributes
+								manage_attributes(username, operation, idp, attributes)
+							}
+						}
+					}
+
 					return nil
 				},
 			},
@@ -312,12 +572,16 @@ func main() {
 				Description: "List all users with registered IdPs, only users belonging to the idpadmins group can perform this operation",
 				Action: func(c *cli.Context) error {
 					// Check if the current user is the idpadmins group
+					/*
 					if !isAdministrator() {
 						fmt.Println("[!] Error: current user is not an administrator")
 						return nil
 					}
+					*/
 
-					fmt.Println("list-users")
+					// List users
+					list_users()
+
 					return nil
 				},
 			},
@@ -326,7 +590,12 @@ func main() {
 				Usage:   	 "list-idps",
 				Description: "List all registered IdPs, only for the current user",
 				Action: func(c *cli.Context) error {
-					fmt.Println("list-idps")
+					// Get the current user
+					username := getCurrentUser()
+
+					// List IdPs
+					list_idps(username)
+
 					return nil
 				},
 			},
