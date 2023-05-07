@@ -5,7 +5,6 @@ import time
 
 # Request a device code from github
 def request_device_code(client_id, scope):
-    url = 'https://github.com/Pengrey/IAA'
     data = {
         'client_id': client_id,
         'scope': scope
@@ -48,7 +47,6 @@ def poll_for_token(client_id, device_code, interval, timeout):
                 time.sleep(interval)
         else:
             return None
-            
 
 # test implementation
 def main():
