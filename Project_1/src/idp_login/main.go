@@ -71,13 +71,6 @@ func check_requirements() {
 		}
 		defer db.Close()
 
-		// Create users table
-		_, err = db.Exec("CREATE TABLE users (username TEXT PRIMARY KEY, idps TEXT)")
-		if err != nil {
-			fmt.Println("[!] Error: could not create users table")
-			return
-		}
-
 		// Create idps table
 		_, err = db.Exec("CREATE TABLE idps (name TEXT PRIMARY KEY, params TEXT)")
 		if err != nil {
@@ -302,8 +295,8 @@ func list_idps(username string) {
 	// Close database connection
 	defer db.Close()
 
-	// Query the database
-	rows, err := db.Query("SELECT idp FROM attributes WHERE username = ?", username)
+	// Query the database for the user's IdPs and attributes
+	rows, err := db.Query("SELECT idp, attributes FROM attributes WHERE username = ?", username)
 	if err != nil {
 		fmt.Println("[!] Error: could not query database")
 		return
@@ -312,12 +305,26 @@ func list_idps(username string) {
 	// Close rows
 	defer rows.Close()
 
-	// Print IdPs
-	fmt.Println("[+] IdPs:")
+	// Print IdPs and pretty print attributes
 	for rows.Next() {
 		var idp string
-		rows.Scan(&idp)
-		fmt.Println("    - " + idp)
+		var attributes string
+		var out bytes.Buffer
+
+		rows.Scan(&idp, &attributes)
+
+		err := json.Indent(&out, []byte(attributes), "", "\t")
+		if err != nil {
+			fmt.Println("[!] Error: could not indent JSON")
+			fmt.Println("[+] IdP name: " + idp)
+			fmt.Println("[+] IdP params:")
+			fmt.Println(attributes)
+			return
+		}
+
+		fmt.Println("[+] IdP name: " + idp)
+		fmt.Println("[+] IdP attributes:")
+		fmt.Println(out.String())
 	}
 }
 
@@ -374,7 +381,7 @@ func manage_attributes(username string, operation string, idp string, attributes
 	}
 
 	// Check if attributes is empty
-	if attributes == "" {
+	if attributes == "" && operation != "delete" {
 		fmt.Println("[!] Error: attributes cannot be empty")
 		return
 	}
@@ -553,7 +560,7 @@ func main() {
 							// Get the attributes
 							attributes := c.String("attributes")
 
-							if attributes == "" {
+							if attributes == "" && operation != "delete" {
 								// Print the attributes for the given IdP
 								print_attributes(idp)
 							} else {

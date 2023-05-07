@@ -54,22 +54,21 @@ idp_login list-idps
 - To set an IdP with its operational parameters:
 
 ```bash
-sudo idp_login manage-idp --operation set --idp google --params '{"request_url":"https://accounts.google.com/o/oauth2/device/code","request_arguments":{"client_id":"572020437555-gmf1c30oaqla0749f730udft703es94q.apps.googleusercontent.com","scope":"https://www.googleapis.com/auth/userinfo.email"},"user_url":"https://accounts.google.com/o/oauth2/device/usercode","poll_url":"https://accounts.google.com/o/oauth2/token","poll_arguments":{"client_id":"572020437555-gmf1c30oaqla0749f730udft703es94q.apps.googleusercontent.com","client_secret":"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","device_code":None,"grant_type":"urn:ietf:params:oauth:grant-type:device_code"}}'
+sudo idp_login manage-idp --operation set --idp google --params '{"request_url":"https://accounts.google.com/o/oauth2/device/code","request_arguments":{"client_id":"","scope":""},"user_url":"https://accounts.google.com/o/oauth2/device/usercode","poll_url":"https://accounts.google.com/o/oauth2/token","poll_arguments":{"client_id":"","client_secret":"","device_code":"","grant_type":""}}'
 ```
 
 ```bash
-sudo idp_login manage-idp --operation set --idp github --params '{"request_url":"https://github.com/login/device/code","request_arguments":{"client_id":"a6b22dc869165e33cd5b","scope":"user:email"},"user_url":"https://github.com/login/device","poll_url":"https://github.com/login/oauth/access_token","poll_arguments":{"client_id":"a6b22dc869165e33cd5b","device_code":None,"grant_type":"urn:ietf:params:oauth:grant-type:device_code"}}'
+sudo idp_login manage-idp --operation set --idp github --params '{"request_url":"https://github.com/login/device/code","request_arguments":{"client_id":"","scope":""},"user_url":"https://github.com/login/device","poll_url":"https://github.com/login/oauth/access_token","poll_arguments":{"client_id":"","device_code":"","grant_type":""}}'
 ```
 
 - To change an IdP's operational parameters:
 
 ```bash
-sudo idp_login manage-idp --operation change --idp google --params '{"request_url":"https://accounts.google.com/o/oauth2/device/code","request_arguments":{"client_id":"572020437555-gmf1c30oaqla0749f730udft703es94q.apps.googleusercontent.com","scope":"https://www.googleapis.com/auth/userinfo.email"},"user_url":"https://accounts.google.com/o/oauth2/device/usercode","poll_url":"https://accounts.google.com/o/oauth2/token","poll_arguments":{"client_id":"562020437555-gmf1c30oaqla0749f730udft703es94q.apps.googleusercontent.com","client_secret":"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","device_code":None,"grant_type":"urn:ietf:params:oauth:grant-type:device_code"}}'
+sudo idp_login manage-idp --operation change --idp google --params '{"request_url":"https://accounts.google.com/o/oauth2/device/code","request_arguments":{"client_id":"","scope":""},"user_url":"https://accounts.google.com/o/oauth2/device/usercode","poll_url":"https://accounts.google.com/o/oauth2/token","poll_arguments":{"client_id":"","client_secret":"","device_code":"","grant_type":""}}'
 ```
 
 ```bash
-```bash
-sudo idp_login manage-idp --operation change --idp github --params '{"request_url":"https://github.com/login/device/code","request_arguments":{"client_id":"a6b22dc869165e33cd5b","scope":"user:email"},"user_url":"https://github.com/login/device","poll_url":"https://github.com/login/oauth/access_token","poll_arguments":{"client_id":"a7b22dc869165e33cd5b","device_code":None,"grant_type":"urn:ietf:params:oauth:grant-type:device_code"}}'
+sudo idp_login manage-idp --operation change --idp github --params '{"request_url":"https://github.com/login/device/code","request_arguments":{"client_id":"","scope":""},"user_url":"","poll_url":"https://github.com/login/oauth/access_token","poll_arguments":{"client_id":"","device_code":"","grant_type":""}}'
 ```
 
 - To delete an IdP:
@@ -82,11 +81,52 @@ sudo idp_login manage-idp --operation delete --idp google
 sudo idp_login manage-idp --operation delete --idp github
 ```
 
-- To set identity attributes for a given IdP:
+- To Show the available IdPs:
 
 ```bash
-idp_login manage-attributes --operation set --idp IDP_NAME --attributes ATTRIBUTES
+idp_login manage-attributes --operation set
 ```
+
+- To Show the available attributes for an IdP:
+
+```bash
+idp_login manage-attributes --operation set --idp google
+```
+
+```bash
+idp_login manage-attributes --operation set --idp github
+```
+
+- To set identity attributes for an IdP:
+
+```bash
+idp_login manage-attributes --operation set --idp google --attributes '{"request_url":"https://accounts.google.com/o/oauth2/device/code","request_arguments":{"client_id":"572020437555-gmf1c30oaqla0749f730udft703es94q.apps.googleusercontent.com","scope":"https://www.googleapis.com/auth/userinfo.email"},"user_url":"https://accounts.google.com/o/oauth2/device/usercode","poll_url":"https://accounts.google.com/o/oauth2/token","poll_arguments":{"client_id":"562020437555-gmf1c30oaqla0749f730udft703es94q.apps.googleusercontent.com","client_secret":"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","device_code":"","grant_type":"urn:ietf:params:oauth:grant-type:device_code"}}'
+```
+
+```bash
+idp_login manage-attributes --operation set --idp github --attributes '{"request_url":"https://github.com/login/device/code","request_arguments":{"client_id":"a6b22dc869165e33cd5b","scope":"user:email"},"user_url":"https://github.com/login/device","poll_url":"https://github.com/login/oauth/access_token","poll_arguments":{"client_id":"a7b22dc869165e33cd5b","device_code":"","grant_type":"urn:ietf:params:oauth:grant-type:device_code"}}'
+```
+
+- To change identity attributes for an IdP:
+
+```bash
+idp_login manage-attributes --operation change --idp google --attributes '{"request_url":"https://accounts.google.com/o/oauth2/device/code","request_arguments":{"client_id":"572020437555-gmf1c30oaqla0749f730udft703es94q.apps.googleusercontent.com","scope":"https://www.googleapis.com/auth/userinfo.email"},"user_url":"https://accounts.google.com/o/oauth2/device/usercode","poll_url":"https://accounts.google.com/o/oauth2/token","poll_arguments":{"client_id":"572020437555-gmf1c30oaqla0749f730udft703es94q.apps.googleusercontent.com","client_secret":"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","device_code":"","grant_type":"urn:ietf:params:oauth:grant-type:device_code"}}'
+```
+
+```bash
+idp_login manage-attributes --operation change --idp github --attributes '{"request_url":"https://github.com/login/device/code","request_arguments":{"client_id":"a7b22dc869165e33cd5b","scope":"user:email"},"user_url":"https://github.com/login/device","poll_url":"https://github.com/login/oauth/access_token","poll_arguments":{"client_id":"a7b22dc869165e33cd5b","device_code":"","grant_type":"urn:ietf:params:oauth:grant-type:device_code"}}'
+```
+
+- To delete identity attributes for an IdP:
+
+```bash
+idp_login manage-attributes --operation delete --idp google
+```
+
+```bash
+idp_login manage-attributes --operation delete --idp github
+```
+
 
 - To list all users with registered IdPs:
 
@@ -144,14 +184,5 @@ sudo mv idp_login /usr/bin          // Move the application to /usr/bin
 ```
 
 # TODOs
-- [ ] Enable IdP Creation
-- [ ] Enable IdP Deletion
-- [ ] Enable IdP Modification
-- [ ] Enable Attribute Creation
-- [ ] Enable Attribute Deletion
-- [ ] Enable Attribute Modification
-- [ ] Enable User Listing
-- [ ] Enable IdP Listing
-- [ ] Enable Attribute Listing
-- [ ] Get IdPs from DB
-- [ ] Get attributes from DB
+- [ ] Get IdPs from DB on PAM
+- [ ] Get attributes from DB on PAM
