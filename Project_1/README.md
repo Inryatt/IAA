@@ -115,11 +115,24 @@ session	sufficient pam_python.so /path/to/Project_1/src/login.py
 ### IdP Login
 To install the IdP Login command-line application, run the following command:
 ```bash
-cd Project_1/src/idp_login
-go build -o idp_login main.go       // Build the application
 sudo groupadd idpadmins             // Create a group for IdP administrators
 sudo usermod -a -G idpadmins root   // Add root to the group
+cd Project_1/src/idp_login
+go build -o idp_login main.go       // Build the application
 sudo chown root idp_login           // Set the owner to root
 sudo chmod 4750 idp_login           // Set the setuid bit
 sudo mv idp_login /usr/bin          // Move the application to /usr/bin
 ```
+
+# TODOs
+- [ ] Enable IdP Creation
+- [ ] Enable IdP Deletion
+- [ ] Enable IdP Modification
+- [ ] Enable Attribute Creation
+- [ ] Enable Attribute Deletion
+- [ ] Enable Attribute Modification
+- [ ] Enable User Listing
+- [ ] Enable IdP Listing
+- [ ] Enable Attribute Listing
+- [ ] Get IdPs from DB
+- [ ] Get attributes from DB
