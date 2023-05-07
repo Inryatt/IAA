@@ -11,6 +11,9 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const DATABASE_PATH = "/tmp/project_1.sqlite"
+//const DATABASE_PATH = "/etc/project_1.sqlite"
+
 func isAdministrator() bool {
 	// Check if the current user is the idpadmins group
 	usr, err := user.Current()
@@ -44,18 +47,22 @@ func isAdministrator() bool {
 }
 
 func check_requirements() {
+	// Print requirements message
+	fmt.Println("[*] Checking requirements...")
+	/*
 	// Check if the program has the setuid bit set
 	if os.Geteuid() != 0 {
 		fmt.Println("[!] Error: program must be run with the 4750 permissions")
 		return
 	}
+	*/
 
 	// Check if database exists
-	if _, err := os.Stat("/etc/project_1.db"); os.IsNotExist(err) {
+	if _, err := os.Stat(DATABASE_PATH); os.IsNotExist(err) {
 		fmt.Println("[-] Database does not exist, creating it...")
 
 		// Create database
-		db, err := sql.Open("sqlite3", "/etc/project_1.db")
+		db, err := sql.Open("sqlite3", DATABASE_PATH)
 		if err != nil {
 			fmt.Println("[!] Error: could not create database")
 			return
@@ -82,6 +89,133 @@ func check_requirements() {
 			fmt.Println("[!] Error: could not create attributes table")
 			return
 		}
+	}
+
+	// Print success message
+	fmt.Println("[+] All requirements met")
+}
+
+func idp_exists(idp string) bool {
+	// Open database connection
+	db, err := sql.Open("sqlite3", DATABASE_PATH)
+	if err != nil {
+		fmt.Println("[!] Error: could not open database")
+		return false
+	}
+
+	// Close database connection
+	defer db.Close()
+
+	// Check if the IdP exists
+	rows, err := db.Query("SELECT name FROM idps WHERE name = ?", idp)
+	if err != nil {
+		fmt.Println("[!] Error: could not query database")
+		return false
+	}
+
+	// Close rows
+	defer rows.Close()
+
+	// Check if the IdP exists
+	if rows.Next() {
+		return true
+	}
+
+	return false
+}
+
+func manage_idp(operation string, idp string, params string) {
+	// If the operation is set, check if the IdP already exists
+	if operation == "set" {
+		// Check if params is empty
+		if params == "" {
+			fmt.Println("[!] Error: params cannot be empty for set operation")
+			return
+		}
+
+		// Check if the IdP already exists
+		if idp_exists(idp) {
+			fmt.Println("[!] Error: IdP already exists")
+			return
+		}
+
+		// Open database connection
+		db, err := sql.Open("sqlite3", DATABASE_PATH)
+		if err != nil {
+			fmt.Println("[!] Error: could not open database")
+			return
+		}
+
+		// Close database connection
+		defer db.Close()
+
+		// Insert the IdP into the database
+		_, err = db.Exec("INSERT INTO idps (name, params) VALUES (?, ?)", idp, params)
+		if err != nil {
+			fmt.Println("[!] Error: could not insert IdP into database")
+			return
+		}
+
+		// Print success message
+		fmt.Println("[+] IdP successfully added")
+	} else if operation == "change" {
+		// Check if params is empty
+		if params == "" {
+			fmt.Println("[!] Error: params cannot be empty for change operation")
+			return
+		}
+		// Check if the IdP exists
+		if !idp_exists(idp) {
+			fmt.Println("[!] Error: IdP does not exist")
+			return
+		}
+
+		// Open database connection
+		db, err := sql.Open("sqlite3", DATABASE_PATH)
+		if err != nil {
+			fmt.Println("[!] Error: could not open database")
+			return
+		}
+
+		// Close database connection
+		defer db.Close()
+
+		// Update the IdP in the sqlite database
+		_, err = db.Exec("UPDATE idps SET params = ? WHERE name = ?", params, idp)
+		if err != nil {
+			// print error
+			fmt.Println(err)
+			return
+		}
+
+		// Print success message
+		fmt.Println("[+] IdP successfully updated")
+	} else if operation == "delete" {
+		// Check if the IdP exists
+		if !idp_exists(idp) {
+			fmt.Println("[!] Error: IdP does not exist")
+			return
+		}
+
+		// Open database connection
+		db, err := sql.Open("sqlite3", DATABASE_PATH)
+		if err != nil {
+			fmt.Println("[!] Error: could not open database")
+			return
+		}
+
+		// Close database connection
+		defer db.Close()
+
+		// Delete the IdP from the database
+		_, err = db.Exec("DELETE FROM idps WHERE name = ?", idp)
+		if err != nil {
+			fmt.Println("[!] Error: could not delete IdP from database")
+			return
+		}
+
+		// Print success message
+		fmt.Println("[+] IdP successfully deleted")
 	}
 }
 
@@ -119,12 +253,28 @@ func main() {
 				},
 				Action: func(c *cli.Context) error {
 					// Check if the current user is the idpadmins group
+					/*
 					if !isAdministrator() {
 						fmt.Println("[!] Error: current user is not an administrator")
 						return nil
 					}
+					*/
 
-					fmt.Println("manage-idp")
+					// Get the operation to perform
+					operation := c.String("operation")
+					if operation != "set" && operation != "change" && operation != "delete" {
+						fmt.Println("[!] Error: invalid operation")
+					} else {
+						// Get the IdP name
+						idp := c.String("idp")
+						
+						// Get the IdP params
+						params := c.String("params")
+
+						// Manage the IdP
+						manage_idp(operation, idp, params)
+
+					}
 					return nil
 				},
 			},
