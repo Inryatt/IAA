@@ -114,7 +114,7 @@ idp_login manage-attributes --operation change --idp google --attributes '{"requ
 ```
 
 ```bash
-idp_login manage-attributes --operation change --idp github --attributes '{"request_url":"https://github.com/login/device/code","request_arguments":{"client_id":"a7b22dc869165e33cd5b","scope":"user:email"},"user_url":"https://github.com/login/device","poll_url":"https://github.com/login/oauth/access_token","poll_arguments":{"client_id":"a7b22dc869165e33cd5b","device_code":"","grant_type":"urn:ietf:params:oauth:grant-type:device_code"}}'
+idp_login manage-attributes --operation change --idp github --attributes '{"request_url":"https://github.com/login/device/code","request_arguments":{"client_id":"a6b22dc869165e33cd5b","scope":"user:email"},"user_url":"https://github.com/login/device","poll_url":"https://github.com/login/oauth/access_token","poll_arguments":{"client_id":"a6b22dc869165e33cd5b","device_code":"","grant_type":"urn:ietf:params:oauth:grant-type:device_code"}}'
 ```
 
 - To delete identity attributes for an IdP:

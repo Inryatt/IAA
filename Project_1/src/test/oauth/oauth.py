@@ -1,14 +1,10 @@
-import site
-
-site.main()
-
-import os
+import requests
+import time
 import qrcode
 import sqlite3
 import json
-import requests
-import time
 
+# Get available idps for current user
 def get_idps(username, DATABASE_PATH):
     conn = sqlite3.connect(DATABASE_PATH)
     c = conn.cursor()
@@ -169,57 +165,16 @@ def login(username):
     # Request a device code
     return oauth2(idp, qr_code)
 
-def auth(username):
-    if username != None:
-        print("\033[1;32m[+]\033[0m Authenticating user: " + username)
-    
+# test implementation
+def main():
+    username = 'pengrey'
+
     if login(username):
         print('\033[1;32m[+]\033[0m Login successful')
-        return True
     else:
         print('\033[1;31m[!]\033[0m Login failed')
-        return False
 
-def get_user(pamh):
-    try:
-        return pamh.get_user(None)
-    except pamh.exception, e:
-        return e.pam_result
+if __name__ == '__main__':
+    main()
 
-def pam_sm_authenticate(pamh, flags, argv):
-    user = get_user(pamh)
-    if user == None:
-        return pamh.PAM_USER_UNKNOWN
 
-    try:
-        if auth(user) == True:
-            return pamh.PAM_SUCCESS
-        else:
-            return pamh.PAM_AUTH_ERR
-    except pamh.exception, e:
-        return pamh.PAM_AUTH_ERR
-
-def pam_sm_open_session(pamh, flags, argv):
-    user = get_user(pamh)
-
-    if user == None:
-        return pamh.PAM_USER_UNKNOWN
-
-    home_dir = pathlib.Path("/home/" + user)
-
-    if not home_dir.exists():
-        home_dir.mkdir()
-
-    return pamh.PAM_SUCCESS
-
-def pam_sm_close_session(pamh, flags, argv):
-    return pamh.PAM_SUCCESS
-
-def pam_sm_setcred(pamh, flags, argv):
-    return pamh.PAM_SUCCESS
-
-def pam_sm_acct_mgmt(pamh, flags, argv):  
-    return pamh.PAM_SUCCESS
-
-def pam_sm_chauthtok(pamh, flags, argv):
-    return pamh.PAM_SUCCESS
