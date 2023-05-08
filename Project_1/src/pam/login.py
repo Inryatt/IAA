@@ -19,7 +19,6 @@ def get_idps(username, DATABASE_PATH):
     conn.close()
     return idps
 
-# Get idp information
 def get_idp(idp, username, DATABASE_PATH):
     conn = sqlite3.connect(DATABASE_PATH)
     c = conn.cursor()
@@ -29,7 +28,6 @@ def get_idp(idp, username, DATABASE_PATH):
 
     conn.close()
 
-    # Get idp json
     try:
         python_dict = json.loads(idp[0][0])
         idp = {
@@ -43,8 +41,6 @@ def get_idp(idp, username, DATABASE_PATH):
 
     return idp
 
-
-# Parse API response
 def parse_response(response, dict):
     response = response.replace(' ' , '') \
                        .replace('\n', '') \
@@ -59,7 +55,6 @@ def parse_response(response, dict):
         dict[key] = value
     return dict
 
-# Request a device code
 def request_device(client_id, scope, url):
     data = {
         'client_id': client_id,
@@ -72,19 +67,15 @@ def request_device(client_id, scope, url):
         response_dict = parse_response(response.text, {})
         return (response_dict['device_code'], response_dict['user_code'])
     else:
-        # Print error message
         print('\033[1;31m[!]\033[0m Error requesting device code')
         return None
 
-# Generate QR code and print to console
 def generate_qr_code(url):
     qr = qrcode.QRCode(version=1, box_size=10, border=5)
     qr.add_data(url)
     qr.make(fit=True)
     qr.print_ascii()
 
-
-# Poll for a user token
 def poll_for_token(url, arguments):
     interval = 5
     timeout = 60
@@ -103,15 +94,12 @@ def poll_for_token(url, arguments):
             return None
 
 def oauth2(idp, qr_code):
-    # Request a device code
     device_code, user_code = request_device(idp['request_arguments']['client_id'], idp['request_arguments']['scope'], idp['request_url'])
     if device_code == None:
         return False
 
-    # Update poll arguments
     idp['poll_arguments']['device_code'] = device_code
 
-    # Print User information
     if qr_code:
         print('\033[1;32m[+]\033[0m Please scan the following QR code with your mobile device:')
         generate_qr_code(idp['user_url'])
@@ -120,7 +108,6 @@ def oauth2(idp, qr_code):
     
     print('\033[1;32m[+]\033[0m Enter the following code when prompted: ' + user_code)
 
-    # Poll for a user token
     response_dict = poll_for_token(idp['poll_url'], idp['poll_arguments'])
     if response_dict == None:
         return False
@@ -128,20 +115,16 @@ def oauth2(idp, qr_code):
     return True
 
 def login(username):
-    DATABASE_PATH = "/tmp/project_1.sqlite"
-    # DATABASE_PATH = "/etc/project_1.sqlite"
+    DATABASE_PATH = "/etc/project_1.sqlite"
 
-    # Get available idps for current user
     idps = get_idps(username, DATABASE_PATH)
 
-    # Present user with a list of available idps and prompt for selection
     print('\033[1;33m[?]\033[0m Please select an IdP:')
     for i, idp in enumerate(idps):
         print('[' + str(i) + '] ' + idp[0])
 
     selection = raw_input('[>] ')
 
-    # Validate selection
     try:
         selection = int(selection)
         if selection < 0 or selection >= len(idps):
@@ -150,13 +133,10 @@ def login(username):
         print('\033[1;31m[!]\033[0m Invalid selection')
         return False
 
-    # Get idp information
     idp = idps[selection][0]
 
-    # Get idp information
     idp = get_idp(idp, username, DATABASE_PATH)
 
-    # Ask user if they would like to scan a QR code or enter a URL
     qr_code = raw_input('\033[1;33m[?]\033[0m Would you like to scan a QR code? [y/n] ')
     if qr_code == 'y':
         qr_code = True
@@ -166,7 +146,6 @@ def login(username):
         print('\033[1;31m[!]\033[0m Invalid input')
         return False
 
-    # Request a device code
     return oauth2(idp, qr_code)
 
 def auth(username):

@@ -182,7 +182,3 @@ sudo chown root idp_login           // Set the owner to root
 sudo chmod 4750 idp_login           // Set the setuid bit
 sudo mv idp_login /usr/bin          // Move the application to /usr/bin
 ```
-
-# TODOs
-- [ ] Get IdPs from DB on PAM
-- [ ] Get attributes from DB on PAM
