@@ -2,8 +2,10 @@
 
 ## Project Description
 This project is a PAM module that allows users to authenticate using external Identity Providers (IdPs). The module uses OAuth 2.0 with the Device Authorization Grant strategy to authenticate users.
+![image](https://user-images.githubusercontent.com/55480558/236838170-a0ff8d8f-7737-4085-889f-aae397043fdf.png)
 
 ## Project Structure
+![image](https://user-images.githubusercontent.com/55480558/236838210-94a208ed-cb80-4018-b231-7d62e018d949.png)
 
 ## idp_login
 `idp_login` is a command-line application to manage Identity Providers (IdPs) and identity attributes for users in a protected repository.
