@@ -89,9 +89,9 @@ def poll_for_token(url, arguments):
             if 'access_token' in response_dict:
                 return response_dict
             else:
-                timeout = timeout - interval
-                if timeout <=0:
-                    return None
+                #timeout = timeout - interval
+                #if timeout <=0:
+                #    return None
                 time.sleep(interval)
         else:
             return None
